@@ -1,0 +1,7 @@
+cflib
+num2words
+numpy
+pocketsphinx
+pyaudio
+SpeechRecognition
+word2number
