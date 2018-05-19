@@ -1,4 +1,8 @@
+import json
+import Levenshtein
 from num2words import num2words
+import operator
+import requests
 import speech_recognition as sr
 from word2number import w2n
 
@@ -6,33 +10,67 @@ from word2number import w2n
 This module implements the voice control functionality.
 """
 
+server_url = 'http://localhost:8081'
 
-def move(crazyflie, direction, distance):
+uses_google_api = True
+
+code_word = 'crazy'
+stop_word = 'stop'
+
+directions = [
+    'up',
+    'down',
+    'back',
+    'ahead',
+    'left',
+    'right',
+    stop_word
+]
+
+
+def generate_protocol_data(direction, distance):
     """
-    Moves the crazyflie from its current position in the provided direction
-    :param crazyflie: The crazyflie to be controlled
-    :param direction: The direction, into which the crazyflie should move
-    :param distance: The distance the crazyflie should move
+    Generates the command JSON object the Crazyflie control server expects
+    :param direction:
+    :param distance:
+    :return: command to be send to the control server
     """
-    print(f'Moving crazyflie: {direction} {distance}')
+    if direction == stop_word:
+        return {'command': 'stop'}
+    else:
+        distance = distance / 100
+        if direction == 'up':
+            return {'distance': [0, 0, distance]}
+        if direction == 'down':
+            return {'distance': [0, 0, -distance]}
+        if direction == 'back':
+            return {'distance': [0, -distance, 0]}
+        if direction == 'ahead':
+            return {'distance': [0, distance, 0]}
+        if direction == 'left':
+            return {'distance': [-distance, 0, 0]}
+        if direction == 'right':
+            return {'distance': [distance, 0, 0]}
 
-    if direction == 'go up':
-        print()
-    elif direction == 'lower':
-        print()
-    elif direction == 'back':
-        print()
-    elif direction == 'ahead':
-        print()
-    elif direction == 'left':
-        print()
-    elif direction == 'right':
-        print()
-    elif direction == 'start landing':
-        print()
-        crazyflie.commander.send_stop_setpoint()
 
+def get_best_direction_match(direction_input):
+    """
+    Returns best direction matched, based on input direction
+    :param direction_input: direction as provided by the voice-to-text parser
+    :return: best match if score < 4; else None
+    """
+    levenshtein_scores = {}
 
+    for direction in directions:
+        if direction == direction_input:
+            return direction
+        levenshtein_scores[direction] =\
+            Levenshtein.distance(direction, direction_input)
+
+    best_match = min(levenshtein_scores.items(), key=operator.itemgetter(1))
+    if best_match[1] < 4:
+        return best_match[0]
+    return None
 
 
 def listen(recognizer, mic, keywords):
@@ -48,37 +86,34 @@ def listen(recognizer, mic, keywords):
         recognizer.adjust_for_ambient_noise(source)
         audio = recognizer.listen(source)
     try:
-        response = recognizer.recognize_sphinx(audio, keyword_entries=keywords)
+        if uses_google_api:
+            response = recognizer.recognize_google(audio)
+        else:
+            response = recognizer.recognize_sphinx(audio,
+                                                    keyword_entries=keywords)
     except sr.RequestError:
-        print('CMU Sphinx installation missing or not working.')
+        print('Voice control setup missing or not working.')
     except sr.UnknownValueError:
         print('Could not recognize speech')
     return response
 
 
-def start_command_loop(crazyflie):
+def start_command_loop():
     """
-    :param crazyflie: The crazyflie to be controlled
     Starts the voice control command loop
     """
+
     recognizer = sr.Recognizer()
     mic = sr.Microphone()
 
-    directions = [
-        'go up',
-        'lower',
-        'back',
-        'ahead',
-        'left',
-        'right',
-        'start landing'
-    ]
-
-    distances = [f'{num2words(i)}' for i in range(0, 1000, 10)]
+    if uses_google_api:
+        distances = [i for i in range(0, 1000, 10)]
+    else:
+        distances = [f'{num2words(i)}' for i in range(0, 1000, 10)]
 
     keyword_entries = {
         'code_word': [
-            ('crazy', 1)
+            (code_word, 1)
         ],
         'direction': [
             (direction, 1) for direction in directions
@@ -97,28 +132,61 @@ def start_command_loop(crazyflie):
         print('Waiting for code word...')
         while True:
             word = listen(recognizer, mic, keyword_entries['code_word'])
-            if word and 'crazy' in word:
+            print(word)
+            if word and code_word in word:
                 print(f'Code word received.')
                 break
         print('Waiting for direction...')
         while True:
             term = listen(recognizer, mic, keyword_entries['direction'])
-            if term and term in directions:
-                responses['direction'] = term
+            print(term)
+            if term:
+                responses['direction'] = get_best_direction_match(term.strip())
                 break
         print(f'Direction received: {responses["direction"]}')
-        if 'start landing' not in responses['direction']:
+        if stop_word not in responses['direction']:
             print('Waiting for distance...')
-            print(distances)
             while True:
                 term = listen(recognizer, mic, keyword_entries['distance'])
-                print(term)
-                if term and any(distance in term for distance in distances):
-                    responses['distance'] = w2n.word_to_num(term)
+                distance = None
+                if uses_google_api:
+                    try:
+                        distance = int(term)
+                    except (ValueError, TypeError):
+                        print(f'{term} is not a number')
+                    if distance and distance in distances:
+                        responses['distance'] = distance
+                else:
+                    if term and any(distance in term for distance in distances):
+                        distance = w2n.word_to_num(term)
+                        responses['distance'] = distance
+                if distance:
+                    print(f'Distance received: {responses["distance"]}')
+                    data = generate_protocol_data(
+                        responses['direction'],
+                        responses['distance']
+                    )
+                    try:
+                        command_request = requests.post(
+                            server_url, data=json.dumps(data))
+                        res_content = command_request.content
+                        print(f'Send data to server with result: {res_content}')
+                    except Exception as e:
+                        print(f'Failed to send request: {e}')
                     break
 
-            print(f'Distance received: {responses["distance"]}')
-        move(crazyflie, responses['direction'], responses["distance"])
+
+start_command_loop()
 
 
-start_command_loop(None)
+"""
+# Test connection to server
+data = generate_protocol_data('up', 1)
+print(data)
+try:
+    request = requests.post(server_url, data=json.dumps(data))
+    response = request.content
+    print(f'Send data to server with result: {response}')
+except Exception as e:
+    print(f'Failed to send request: {e}')
+"""
