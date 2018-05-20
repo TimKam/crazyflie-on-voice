@@ -21,7 +21,7 @@ directions = [
     'up',
     'down',
     'back',
-    'ahead',
+    'forward',
     'left',
     'right',
     stop_word
@@ -45,7 +45,7 @@ def generate_protocol_data(direction, distance):
             return {'distance': [0, 0, -distance]}
         if direction == 'back':
             return {'distance': [0, -distance, 0]}
-        if direction == 'ahead':
+        if direction == 'forward':
             return {'distance': [0, distance, 0]}
         if direction == 'left':
             return {'distance': [-distance, 0, 0]}
@@ -135,46 +135,44 @@ def start_command_loop():
             print(term)
             if term:
                 first_word = term.split()[0]
-                if code_word in first_word:
+                if len(term.split()) > 2 and code_word in first_word:
                     print(f'Code word received.')
                     print('Getting direction...')
-                    direction_term = term.replace(f'{code_word}','').strip()
+                    direction_term = term.split()[1]
                     best_direction_match =\
                         get_best_direction_match(direction_term)
                     if best_direction_match:
                         responses['direction'] = best_direction_match
-                        break
-        print(f'Direction received: {responses["direction"]}')
-        if stop_word not in responses['direction']:
-            print('Waiting for distance...')
-            while True:
-                term = listen(recognizer, mic, keyword_entries['distance'])
-                distance = None
-                if uses_google_api:
-                    try:
-                        distance = int(term)
-                    except (ValueError, TypeError):
-                        print(f'{term} is not a number')
-                    if distance and distance in distances:
-                        responses['distance'] = distance
-                else:
-                    if term and any(distance in term for distance in distances):
-                        distance = w2n.word_to_num(term)
-                        responses['distance'] = distance
-                if distance:
-                    print(f'Distance received: {responses["distance"]}')
-                    data = generate_protocol_data(
-                        responses['direction'],
-                        responses['distance']
-                    )
-                    try:
-                        command_request = requests.post(
-                            server_url, data=json.dumps(data))
-                        res_content = command_request.content
-                        print(f'Send data to server with result: {res_content}')
-                    except Exception as e:
-                        print(f'Failed to send request: {e}')
-                    break
+                        print(f'Direction received: {responses["direction"]}')
+                        if stop_word not in responses['direction']:
+                            print('Getting distance...')
+                            direction_term = term.split()[2]
+                            distance = None
+                            if uses_google_api:
+                                try:
+                                    distance = int(direction_term)
+                                except (ValueError, TypeError):
+                                    print(f'{direction_term} is not a number')
+                                if distance and distance in distances:
+                                    responses['distance'] = distance
+                            else:
+                                if direction_term and any(distance in direction_term for distance in distances):
+                                    distance = w2n.word_to_num(direction_term)
+                                    responses['distance'] = distance
+                            if distance:
+                                print(f'Distance received: {responses["distance"]}')
+                                data = generate_protocol_data(
+                                    responses['direction'],
+                                    responses['distance']
+                                )
+                                try:
+                                    command_request = requests.post(
+                                        server_url, data=json.dumps(data))
+                                    res_content = command_request.content
+                                    print(f'Send data to server with result: {res_content}')
+                                except Exception as e:
+                                    print(f'Failed to send request: {e}')
+                                break
 
 
 start_command_loop()
