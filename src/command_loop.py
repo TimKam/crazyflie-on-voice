@@ -131,18 +131,19 @@ def start_command_loop():
     while True:
         print('Waiting for code word...')
         while True:
-            word = listen(recognizer, mic, keyword_entries['code_word'])
-            print(word)
-            if word and code_word in word:
-                print(f'Code word received.')
-                break
-        print('Waiting for direction...')
-        while True:
-            term = listen(recognizer, mic, keyword_entries['direction'])
+            term = listen(recognizer, mic, keyword_entries['code_word'])
             print(term)
             if term:
-                responses['direction'] = get_best_direction_match(term.strip())
-                break
+                first_word = term.split()[0]
+                if code_word in first_word:
+                    print(f'Code word received.')
+                    print('Getting direction...')
+                    direction_term = term.replace(f'{code_word}','').strip()
+                    best_direction_match =\
+                        get_best_direction_match(direction_term)
+                    if best_direction_match:
+                        responses['direction'] = best_direction_match
+                        break
         print(f'Direction received: {responses["direction"]}')
         if stop_word not in responses['direction']:
             print('Waiting for distance...')
