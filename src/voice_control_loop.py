@@ -189,7 +189,7 @@ def start_command_loop():
                             print(f'Failed to send request: {e}')
 
 
-start_command_loop()
+# start_command_loop()
 
 
 """

@@ -1,0 +1,7 @@
+cflib
+num2words
+numpy
+python-Levenshtein
+requests
+SpeechRecognition
+word2number
