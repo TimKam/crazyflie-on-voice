@@ -1,7 +1,7 @@
 cflib
 num2words
 numpy
-pocketsphinx
+# pocketsphinx
 pyaudio
 python-Levenshtein
 requests
