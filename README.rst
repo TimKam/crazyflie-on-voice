@@ -1,5 +1,8 @@
 crazyflie-on-voice
 ==================
+.. image:: https://travis-ci.org/TimKam/crazyflie-on-voice.svg?branch=master
+    :target: https://travis-ci.org/TimKam/crazyflie-on-voice
+    
 **Important: this project is currently under construction and does not work, yet.**
 
 *crazyflie-on-voice* allows you to voice control Crazyflie 2.0 drones.
@@ -87,5 +90,5 @@ Then, run *crazyflie-on-voice* as follows:
 Troubleshooting voice control
 -----------------------------
 *crazyflie-on-voice* makes use of the *SpeechRecognition* library.
-If you have problems installing the package or with voice processing, read the instructions on the `SpeechRecognition documentation page `https://pypi.org/project/SpeechRecognition/`>__ to and make sure *SpeechRecognition* works on your machine with *PocketSphinx* and *PyAudio*.
+If you have problems installing the package or with voice processing, read the instructions on the `SpeechRecognition documentation page `<https://pypi.org/project/SpeechRecognition/`>__ to and make sure *SpeechRecognition* works on your machine with *PocketSphinx* and *PyAudio*.
 
