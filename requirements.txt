@@ -2,7 +2,7 @@ cflib
 num2words
 numpy
 # pocketsphinx
-pyaudio
+# pyaudio
 python-Levenshtein
 requests
 SpeechRecognition
