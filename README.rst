@@ -17,7 +17,7 @@ Installation and setup
 ----------------------
 *crazyflie-on-voice* requires Python 3.6 or higher.
 To install *crazyflie-on-voice*, run ``pip install crazyflie-on-voice``.
-Start the voice controller by running``crazyflie-on-voice "<your_crazyflie_uri>"``.
+Start the voice controller by running ``crazyflie-on-voice "<your_crazyflie_uri>"``.
 (Replace ``<your_crazyflie_uri>`` with the URI of your Crazyflie, e.g. ``radio://0/80/250K``.)
 
 
@@ -90,5 +90,5 @@ Then, run *crazyflie-on-voice* as follows:
 Troubleshooting voice control
 -----------------------------
 *crazyflie-on-voice* makes use of the *SpeechRecognition* library.
-If you have problems installing the package or with voice processing, read the instructions on the `SpeechRecognition documentation page `<https://pypi.org/project/SpeechRecognition/`>__ to and make sure *SpeechRecognition* works on your machine with *PocketSphinx* and *PyAudio*.
+If you have problems installing the package or with voice processing, read the instructions on the `SpeechRecognition documentation page <https://pypi.org/project/SpeechRecognition/>`__ to and make sure *SpeechRecognition* works on your machine with *PocketSphinx* and *PyAudio*.
 
