@@ -1,8 +1,11 @@
+# Author: Christopher Blöcker, Timotheus Kampik, Tobias Sundqvist
+
 from http.server  import HTTPServer, BaseHTTPRequestHandler
 from json         import loads, dumps
 from json.decoder import JSONDecodeError
 from controller   import *
 
+# The request handler for commands that should be sent to the crazyflie.
 class CrazyHandler(BaseHTTPRequestHandler):
     def _set_headers(self):
         self.send_response(200)
@@ -41,12 +44,17 @@ class CrazyHandler(BaseHTTPRequestHandler):
         self.wfile.write(dumps(reply).encode())
 
 
+# Run a server and listen for commands sent to the crazyflie.
 def runServer(hostname, port, commandQueue):
     server              = HTTPServer((hostname, port), CrazyHandler)
     server.commandQueue = commandQueue
     server.serve_forever()
 
 
+# The request handler for the path planning server.
+# When the crazyflie sends a path planning request, the path planning server
+# plans a path in the static scene and sends a sequence of PositionCommands to
+# the crazyflie.
 class PathPlanner(BaseHTTPRequestHandler):
     def _set_headers(self):
         self.send_response(200)
@@ -84,6 +92,7 @@ class PathPlanner(BaseHTTPRequestHandler):
         self.wfile.write(dumps(reply).encode())
 
 
+# Run the path planning server and assume a static scene with static obstacles.
 def runPathPlanner(hostname, port, commandQueue):
     # the static scene
     table1 = Translate(Scale(Cube(), 1.30, 0.65, 0.75), 1.35, 0.68, 0.00)

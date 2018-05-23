@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# Author: Christopher Blöcker, Timotheus Kampik, Tobias Sundqvist, Marcus?
+
 from __future__      import print_function
 
 import logging
@@ -13,21 +15,8 @@ from multiprocessing import Process, Queue
 from server          import runServer, runPathPlanner
 
 # Set a channel - if set to None, the first available crazyflie is used
-URI = 'radio://0/85/2M'
+URI = 'radio://0/110/2M'
 
-# sequence = [ ([1.95, 0.80, 1.60], "hover", 0.0)
-#            , ([1.95, 2.30, 1.60], "hover", 2.0)
-#            , ([1.95, 2.30, 1.10], "hover", 1.0)
-#            , ([1.95, 2.30, 0.90], "stop",  3.0)
-#            , ([1.95, 2.30, 1.60], "hover", 0.0)
-#            , ([1.95, 0.80, 1.60], "hover", 2.0)
-#            , ([1.95, 0.80, 1.10], "hover", 1.0)
-#            , ([1.95, 0.80, 0.90], "stop",  3.0)
-#            , ([1.95, 0.80, 1.60], "hover", 0.0)
-#            , ([1.95, 2.30, 1.60], "hover", 2.0)
-#            , ([1.95, 2.30, 1.10], "hover", 1.0)
-#            , ([1.95, 2.30, 0.90], "stop",  3.0)
-#            ]
 
 def read_input(file=sys.stdin):
     """Registers keystrokes and yield these every time one of the
@@ -118,26 +107,28 @@ def handle_keyboard_input(control, server):
         else:
             print('Unhandled key', ch, 'was pressed')
 
-def handle_voice_input(control, command):
-    print("Received a command: {:s}".format(command))
-
 
 if __name__ == "__main__":
     logging.basicConfig()
     crtp.init_drivers(enable_debug_driver = False)
 
+    # the command queue for the crazyflie
     crazyflieCommandQueue = Queue()
 
+    # set up the crazyflie
     cf = crazyflie.Crazyflie(rw_cache = './cache')
     control = ControllerThread(cf, crazyflieCommandQueue)
     control.start()
 
+    # start the web interface to the crazyflie
     server = Process(target = runServer, args = ("0.0.0.0", 8000, crazyflieCommandQueue))
     server.start()
 
+    # start the path planning server
     pathPlanner = Process(target = runPathPlanner, args = ("0.0.0.0", 8001, crazyflieCommandQueue))
     pathPlanner.start()
 
+    # connect to the crazyflie
     if URI is None:
         print('Scanning for Crazyflies...')
         available = crtp.scan_interfaces()

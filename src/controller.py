@@ -1,3 +1,7 @@
+# The controller for the crazyflie.
+#
+# Author: Christopher Blöcker, Timotheus Kampik, Tobias Sundqvist, Marcus?
+
 import numpy           as np
 import time
 import transformations as trans
@@ -25,6 +29,7 @@ m = 0.0327
 g = 9.82
 
 
+# Commands can be applied to the crazyflie
 class Command():
     def __init__(self):
         pass
@@ -32,6 +37,9 @@ class Command():
     def execute(self, drone):
         pass
 
+
+# The distance command sets a new reference position for the crazyflie, relative
+# to the current reference position.
 class DistanceCommand(Command):
     def __init__(self, dx, dy, dz):
         Command.__init__(self)
@@ -42,6 +50,9 @@ class DistanceCommand(Command):
     def execute(self, drone):
         drone.setRelativeTarget(self.dx, self.dy, self.dz)
 
+
+# The position command sets a new reference position for the crazyflie, however,
+# the new reference position is absolute in this case.
 class PositionCommand(Command):
     def __init__(self, x, y, z):
         Command.__init__(self)
@@ -52,6 +63,9 @@ class PositionCommand(Command):
     def execute(self, drone):
         drone.setAbsoluteTarget(self.x, self.y, self.z)
 
+
+# The start command starts the crazyflie and sets the reference position a few
+# centimeters above the current position.
 class StartCommand(Command):
     def __init__(self):
         Command.__init__(self)
@@ -59,6 +73,9 @@ class StartCommand(Command):
     def execute(self, drone):
         drone.startMotors()
 
+
+# The stop command stops the motors of the crazyflie. In most cases, this is
+# not a beautiful landing.
 class StopCommand(Command):
     def __init__(self):
         Command.__init__(self)
@@ -67,22 +84,7 @@ class StopCommand(Command):
         drone.stopMotors()
 
 
-def planPath(drone, dx, dy, dz):
-    try:
-        start  = Point(drone.pos_ref[0],      drone.pos_ref[1],      drone.pos_ref[2])
-        target = Point(drone.pos_ref[0] + dx, drone.pos_ref[1] + dy, drone.pos_ref[2] + dz)
-
-        planningStart = time.time()
-        path = drone.scene.planPath(start, target)
-        print(path)
-        if drone.debug:
-            print("[DEBUG] Path planning took {:.2f}s.".format(time.time() - planningStart))
-        for waypoint in path:
-            drone.commandQueue.put(PositionCommand(waypoint.x, waypoint.y, waypoint.z))
-    except Exception as e:
-        print("[ERROR] {}".format(e))
-
-
+# The controller thread for the crazyflie.
 class ControllerThread(Thread):
     period_in_ms = 20  # Control period. [ms]
     thrust_step = 5000 # Thrust step with W/S. [65535 = 100% PWM duty cycle]
@@ -338,7 +340,7 @@ class ControllerThread(Thread):
             print('Enabling controller')
         # Need to send a zero setpoint to unlock the controller.
         self.send_setpoint(0.0, 0.0, 0.0, 0)
-        # let it take off a bit
+        # let it take off a bit, i.e. 30cm above the resting position
         self.pos_ref = self.pos + np.r_[0.0, 0.0, 0.3]
         self.enabled = True
         # reset the integrated error!
@@ -366,6 +368,11 @@ class ControllerThread(Thread):
         print("[DEBUG] Switching debug output {:s}".format("off" if self.debug else "on"))
         self.debug = not self.debug
 
+    # Sets a reference position, relative to the current reference position.
+    # For that, a path planning request is made to the path planning server in
+    # a separate thread. (But it's really annoying that we can't start a process
+    # from a thread!) Once the path is planned, the path planning server sets
+    # a sequence of PositionCommands to the crazyflie.
     def setRelativeTarget(self, dx, dy, dz):
         json = dumps({ "start"  : (self.pos_ref[0],      self.pos_ref[1],      self.pos_ref[2])
                      , "target" : (self.pos_ref[0] + dx, self.pos_ref[1] + dy, self.pos_ref[2] + dz)
@@ -374,20 +381,21 @@ class ControllerThread(Thread):
         t.daemon = True
         t.start()
 
+    # Sets a new absolute reference position.
     def setAbsoluteTarget(self, x, y, z):
         self.pos_ref = np.r_[x, y, z]
 
         if self.debug:
             print("[DEBUG] Setting reference position to ({:.2f}, {:.2f}, {:.2f})".format(self.pos_ref[0], self.pos_ref[1], self.pos_ref[2]))
 
+    # Used by StopCommand.execute. Tells the crazyflie to "land".
     def stopMotors(self):
-        #self.stop_motor = True
         self.disable()
         if self.debug:
             print("[DEBUG] Stopping motors!")
 
+    # Used by StartCommand.execute. Tells the crazyflie to start.
     def startMotors(self):
-        #self.stop_motor = False
         self.enable()
         if self.debug:
             print("[DEBUG] Starting motors!")
