@@ -1,3 +1,4 @@
+catkin_pkg
 cflib
 num2words
 numpy
@@ -7,3 +8,4 @@ python-Levenshtein
 requests
 SpeechRecognition
 word2number
+git+https://github.com/davheld/tf#egg=tf
