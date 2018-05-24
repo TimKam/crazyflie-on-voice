@@ -9,3 +9,4 @@ requests
 SpeechRecognition
 word2number
 git+https://github.com/davheld/tf#egg=tf
+-e git+https://github.com/bitcraze/crazyflie-lib-python#egg=cflib
