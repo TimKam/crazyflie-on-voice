@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import logging
 import numpy as np
+import argparse
 import sys
 import termios
 
@@ -15,10 +16,23 @@ from multiprocessing import Process, Queue
 from src.ControlServer import run_server
 from src.PlannigServer import run_path_planner
 
-# Set a channel - if set to None, the first available crazyflie is used
-URI = 'radio://0/110/2M'
-# Set room configuration file
-room_config = '../examples/room_spec1.yaml'
+parser = argparse.ArgumentParser(description='Crazyflie control platform')
+parser.add_argument('-u', '--uri', type=str, default='radio://0/110/2M',
+                    help='The URI of the Crazyflie')
+parser.add_argument('-cp', '--control-port', type=int, default=8000,
+                    help='The port for the control server')
+parser.add_argument('-pp', '--planning-port', type=int, default=8001,
+                    help='The port for the planning server')
+parser.add_argument('-rs', '--room-spec', type=str,
+                    default='../examples/room_spec_1.yaml',
+                    help='The port for the planning server')
+
+args = vars(parser.parse_args())
+
+URI = args['uri']
+room_config = args['room_spec']
+control_port = args['control_port']
+planning_port = args['planning_port']
 
 
 def read_input(file=sys.stdin):
@@ -126,13 +140,13 @@ if __name__ == "__main__":
     # start the web interface to the crazyflie
     server = Process(
         target=run_server,
-        args=("0.0.0.0", 8000, crazyflieCommandQueue))
+        args=("0.0.0.0", control_port, crazyflieCommandQueue))
     server.start()
 
     # start the path planning server
     pathPlanner = Process(
         target=run_path_planner,
-        args=("0.0.0.0", 8001, crazyflieCommandQueue, room_config))
+        args=("0.0.0.0", planning_port, crazyflieCommandQueue, room_config))
     pathPlanner.start()
 
     # connect to the crazyflie
