@@ -2,17 +2,18 @@
 
 # Author: Christopher Blöcker, Timotheus Kampik, Tobias Sundqvist, Marcus?
 
-from __future__      import print_function
+from __future__ import print_function
 
 import logging
-import numpy   as np
+import numpy as np
 import sys
 import termios
 
-from cflib           import crazyflie, crtp
-from controller      import ControllerThread
+from cflib import crazyflie, crtp
+from src.controller import ControllerThread
 from multiprocessing import Process, Queue
-from server          import runServer, runPathPlanner
+from src.ControlServer import run_server
+from src.PlannigServer import  run_path_planner
 
 # Set a channel - if set to None, the first available crazyflie is used
 URI = 'radio://0/110/2M'
@@ -121,11 +122,15 @@ if __name__ == "__main__":
     control.start()
 
     # start the web interface to the crazyflie
-    server = Process(target = runServer, args = ("0.0.0.0", 8000, crazyflieCommandQueue))
+    server = Process(
+        target=run_server,
+        args=("0.0.0.0", 8000, crazyflieCommandQueue))
     server.start()
 
     # start the path planning server
-    pathPlanner = Process(target = runPathPlanner, args = ("0.0.0.0", 8001, crazyflieCommandQueue))
+    pathPlanner = Process(
+        target=run_path_planner,
+        args=("0.0.0.0", 8001, crazyflieCommandQueue))
     pathPlanner.start()
 
     # connect to the crazyflie
