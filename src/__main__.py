@@ -24,12 +24,10 @@ parser.add_argument('-cp', '--control-port', type=int, default=8000,
 parser.add_argument('-pp', '--planning-port', type=int, default=8001,
                     help='The port for the planning server')
 parser.add_argument('-rs', '--room-spec', type=str,
-                    default='../examples/room_spec_1.yaml',
+                    default='./examples/room_spec_1.yaml',
                     help='The port for the planning server')
 
 args = vars(parser.parse_args())
-
-URI = args['uri']
 room_config = args['room_spec']
 control_port = args['control_port']
 planning_port = args['planning_port']
@@ -125,15 +123,16 @@ def handle_keyboard_input(control, server):
             print('Unhandled key', ch, 'was pressed')
 
 
-if __name__ == "__main__":
+def main():
+    uri = args['uri']
     logging.basicConfig()
-    crtp.init_drivers(enable_debug_driver = False)
+    crtp.init_drivers(enable_debug_driver=False)
 
     # the command queue for the crazyflie
     crazyflieCommandQueue = Queue()
 
     # set up the crazyflie
-    cf = crazyflie.Crazyflie(rw_cache = './cache')
+    cf = crazyflie.Crazyflie(rw_cache='./cache')
     control = ControllerThread(cf, crazyflieCommandQueue)
     control.start()
 
@@ -150,21 +149,25 @@ if __name__ == "__main__":
     pathPlanner.start()
 
     # connect to the crazyflie
-    if URI is None:
+    if uri is None:
         print('Scanning for Crazyflies...')
         available = crtp.scan_interfaces()
         if available:
             print('Found Crazyflies:')
             for i in available:
                 print('-', i[0])
-            URI = available[0][0]
+            uri = available[0][0]
         else:
             print('No Crazyflies found!')
             sys.exit(1)
 
-    print('Connecting to', URI)
-    cf.open_link(URI)
+    print('Connecting to', uri)
+    cf.open_link(uri)
 
     handle_keyboard_input(control, server)
 
     cf.close_link()
+
+
+if __name__ == "__main__":
+    main()

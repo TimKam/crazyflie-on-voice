@@ -3,6 +3,11 @@ import codecs, setuptools
 setuptools.setup(
     name='crazyflie-on-voice',
     packages=['src'],
+    entry_points={
+        'console_scripts': [
+            'crazyflie-on-voice = src.__main__:main'
+        ]
+    },
     version='0.0.1',
     description='Voice control Crazyflie 2.0s',
     author='Christopher Blöcker, Timotheus Kampik, Tobias Sundqvist',

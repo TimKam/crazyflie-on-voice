@@ -8,12 +8,12 @@
 
 import numpy as np
 
-from abc      import ABC, abstractmethod
-from redblack import *
+from src.redblack import *
 
 # functions for tuple projections
 fst = lambda p: p[0]
 snd = lambda p: p[1]
+
 
 # A 3D point.
 class Point():

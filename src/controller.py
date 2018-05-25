@@ -2,13 +2,11 @@
 #
 # Author: Christopher Blöcker, Timotheus Kampik, Tobias Sundqvist, Marcus?
 
-import numpy           as np
 import time
 from tf import transformations as trans
 
 from cflib.crazyflie.log import LogConfig
 from threading           import Thread
-from multiprocessing     import Process
 from src.path import *
 from requests            import post
 from json                import dumps

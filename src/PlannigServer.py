@@ -1,8 +1,7 @@
 # Author: Christopher Blöcker, Timotheus Kampik, Tobias Sundqvist
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from json import loads, dumps
-from json.decoder import JSONDecodeError
+from json import loads
 from src.controller import *
 import src.scene_parser as scene_parser
 
