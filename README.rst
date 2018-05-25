@@ -51,9 +51,9 @@ The server accepts ``POST`` requests to its base URL. The requests have to have 
 
     {"distance": ["<x>, <y>, <z>]}
 
-   , where ``<x>``, ``<y>``, ``<z>`` is the **change** in x, y, and z coordinates you want to achieve.
+  , where ``<x>``, ``<y>``, ``<z>`` is the **change** in x, y, and z coordinates you want to achieve.
 
-   For example::
+  For example::
 
     {"distance": [0, 0, 0.5]}}
 
