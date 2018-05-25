@@ -9,5 +9,5 @@ python-Levenshtein
 requests
 SpeechRecognition
 word2number
-git+https://github.com/davheld/tf#egg=tf
+git+https://github.com/TimKam/tf#egg=tf
 -e git+https://github.com/bitcraze/crazyflie-lib-python#egg=cflib

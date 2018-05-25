@@ -7,4 +7,3 @@ pyyaml
 requests
 SpeechRecognition
 word2number
-# git+https://github.com/davheld/tf#egg=tf
