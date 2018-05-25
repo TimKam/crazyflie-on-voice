@@ -4,6 +4,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from json import loads, dumps
 from json.decoder import JSONDecodeError
 from src.controller import *
+import src.scene_parser as scene_parser
 
 # The request handler for the path planning server.
 # When the crazyflie sends a path planning request, the path planning server
@@ -49,14 +50,8 @@ class PathPlanner(BaseHTTPRequestHandler):
 
 
 # Run the path planning server and assume a static scene with static obstacles.
-def run_path_planner(hostname, port, commandQueue):
-    # the static scene
-    table1 = Translate(Scale(Cube(), 1.30, 0.65, 0.75), 1.35, 0.68, 0.00)
-    table2 = Translate(Scale(Cube(), 1.30, 0.65, 0.75), 1.35, 2.68, 0.00)
-
-    obstacle = Translate(Scale(Cube(), 1.60, 0.8, 2.20), 1.25, 1.70, 0.00)
-
+def run_path_planner(hostname, port, command_queue, room_config):
     server = HTTPServer((hostname, port), PathPlanner)
-    server.commandQueue = commandQueue
-    server.scene = Scene(4.0, 4.0, 2.6, 0.1, [table1, table2, obstacle])
+    server.commandQueue = command_queue
+    server.scene = scene_parser.parse(room_config)
     server.serve_forever()

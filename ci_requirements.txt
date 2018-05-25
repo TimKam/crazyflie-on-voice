@@ -3,6 +3,7 @@ cflib
 num2words
 numpy
 python-Levenshtein
+pyyaml
 requests
 SpeechRecognition
 word2number

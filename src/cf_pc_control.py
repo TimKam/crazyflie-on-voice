@@ -13,10 +13,12 @@ from cflib import crazyflie, crtp
 from src.controller import ControllerThread
 from multiprocessing import Process, Queue
 from src.ControlServer import run_server
-from src.PlannigServer import  run_path_planner
+from src.PlannigServer import run_path_planner
 
 # Set a channel - if set to None, the first available crazyflie is used
 URI = 'radio://0/110/2M'
+# Set room configuration file
+room_config = '../examples/room_spec1.yaml'
 
 
 def read_input(file=sys.stdin):
@@ -130,7 +132,7 @@ if __name__ == "__main__":
     # start the path planning server
     pathPlanner = Process(
         target=run_path_planner,
-        args=("0.0.0.0", 8001, crazyflieCommandQueue))
+        args=("0.0.0.0", 8001, crazyflieCommandQueue, room_config))
     pathPlanner.start()
 
     # connect to the crazyflie

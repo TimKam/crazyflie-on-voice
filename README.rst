@@ -61,27 +61,26 @@ The server accepts ``POST`` requests to its base URL. The requests have to have 
 Pathfinding capabilities
 ------------------------
 The drone can autonomously circumvent obstacles using a custom implementation of a an A* search-based pathfinding algorithm.
-You can specify obstacles in a YAML file::
+You can specify obstacles, as well as the measures of the room, in which you are flying, in a YAML file::
 
-     --- # Object 1
-        [0,0,0]
-        [0,1,0]
-        [0,0,1]
-        [1,0,0]
-        [0,1,1]
-        [1,1,0]
-        [1,0,1]
-        [1,1,1]
+    - room:
+      - [4.0, 5.0, 2.5]
 
-     --- # Object 1
-        [5,0,0]
-        [5,1,0]
-        [5,0,1]
-        [6,0,0]
-        [5,1,1]
-        [6,1,0]
-        [6,0,1]
-        [6,1,1]
+    - table1:
+      - [1.30, 0.65, 0.75]
+      - [1.35, 0.68, 0.00]
+
+    - table2:
+      - [1.30, 0.65, 0.75]
+      - [1.35, 2.68, 0.00]
+
+    - obstacle:
+      - [1.60, 0.8, 2.20]
+      - [1.25, 1.70, 0.00]
+
+The first item **has to be** the room measures specification.
+Note that for each obstacle, the first array specifies the measures ``[x, y, z]`` in meters;
+the second array specifies the coordinates of the corner that is closest to ``[0, 0, 0]``.
 
 Then, run *crazyflie-on-voice* as follows:
 

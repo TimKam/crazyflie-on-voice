@@ -4,6 +4,7 @@ num2words
 numpy
 pocketsphinx
 pyaudio
+pyyaml
 python-Levenshtein
 requests
 SpeechRecognition
