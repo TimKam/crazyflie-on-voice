@@ -30,14 +30,14 @@ Options
 The following command line options are available:
 
 * ``--uri``, ``-u``: URI of the crazyflie. Defaults to ``radio://0/110/2M``
-
+`
 * ``--control-port``, ``-cp``: Port for the control server. Defaults to ``8000``.
 
 * ``--planing-port``, ``-pp``: Port for the planning server. Defaults to ``8001``.
 
 * ``--room-spec``, ``-rs``: Path to the room specification file. (see *Path planning* below). Defaults to ``./examples/room_spec_1.yaml``.
 
-* ``--voice`, ``-v``: Add, if you *also* want to start the voice control client. (The voice control client does not start by default.)
+* ``--voice``, ``-v``: Add, if you *also* want to start the voice control client. (The voice control client does not start by default.)
 
 * ``--voice-only`, ``-vo``:  Add, if you *only* want to start the voice control client.
 
