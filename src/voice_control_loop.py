@@ -10,10 +10,6 @@ from word2number import w2n
 This module implements the voice control functionality.
 """
 
-server_url = 'http://130.239.178.194:8000'
-
-uses_google_api = True
-
 start_word = 'start'
 code_word = 'crazy'
 stop_word = 'stop'
@@ -75,12 +71,13 @@ def get_best_direction_match(direction_input):
     return None
 
 
-def listen(recognizer, mic, keywords):
+def listen(recognizer, mic, keywords, uses_google_api):
     """
     Listens for a set of (keyword, priority) tuples and returns the response
     :param recognizer: speech_recognition Recognizer object
     :param mic: speech_recognition Microphone object
     :param keywords: Iterable of (keyword, priority) tuples
+    :param uses_google_api: True if Google API should be used
     :return: response string
     """
     response = None
@@ -100,13 +97,20 @@ def listen(recognizer, mic, keywords):
     return response
 
 
-def start_command_loop():
+def start_command_loop(server_url, voice_api):
     """
     Starts the voice control command loop
+    :param server_url: URL (incl. port) of the control server to connect to
+    :param voice_api: Voice API to use: "google" or "pocketsphinx"
     """
 
     recognizer = sr.Recognizer()
     mic = sr.Microphone()
+
+    if voice_api == 'google' or voice_api is None:
+        uses_google_api = True
+    else:
+        uses_google_api = False
 
     if uses_google_api:
         distances = [i for i in range(0, 1000, 10)]
@@ -132,7 +136,8 @@ def start_command_loop():
 
     while True:
         print('Waiting for code word...')
-        term = listen(recognizer, mic, keyword_entries['code_word'])
+        term = listen(recognizer, mic, keyword_entries['code_word'],
+                      uses_google_api)
         print(term)
         if term:
             first_word = term.split()[0]
