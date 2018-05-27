@@ -57,8 +57,25 @@ To stop your Crazyflie, use ``Crazy stop``.
 
 Pathfinding capabilities
 ------------------------
-The drone can autonomously circumvent obstacles using a custom implementation of a an A* search-based pathfinding algorithm.
-You can specify obstacles, as well as the measures of the room, in which you are flying, in a YAML file::
+The Crazyflie can autonomously circumvent obstacles using a custom implementation of a an `A* search<https://en.wikipedia.org/wiki/A*_search_algorithm>`__-based pathfinding algorithm.
+The bounds of the environment as well as the obstacles within the environment must be described and are assumed to be static.
+Currently, obstacles are described as unit cubes which are then scaled and translated so they represent objects of the correct size and position in the environment.
+(Rotation of objects is currently not possible but could be added easily.)
+For path planning, the scene is discretised as a cartesian grid with cell size 0.1m x 0.1m x 0.1m.
+There is no benefit in using smaller cells since the accuracy of the positioning system is limited.
+For each grid cell, all obstacles are sampled to determine whether they are occupied.
+The grid is then used to find the shortest path that avoids obstacles between two points using A*.
+
+You can model your environment as a `YAML <https://en.wikipedia.org/wiki/YAML>`__ file.
+For example, an obstacle of size 1.6m x 0.8m x 2.2m that has its "origin" at position 1.25m x 1.7m on the floor can be modelled like this::
+
+    - obstacle:
+        - [1.60, 0.8, 2.20]
+        - [1.25, 1.70, 0.00]
+
+
+You should also provide the measures of the room in which you are flying (as the first entry in your YAML file).
+Here is an example of a full specification::
 
     - room:
       - [4.0, 5.0, 2.5]
