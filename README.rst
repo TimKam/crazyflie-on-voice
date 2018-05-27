@@ -5,8 +5,8 @@ crazyflie-on-voice
     
 **Important: this project is currently under construction and does not work, yet.**
 
-*crazyflie-on-voice* allows you to voice control Crazyflie 2.0 drones.
-In addition, it provides a generic HTTP control server that allows integrating the crazyflie with custom programs, as well as with a wide range of third-party systems.
+*crazyflie-on-voice* provides a generic HTTP control server that allows integrating the crazyflie with custom programs, as well as with a wide range of third-party systems.
+In addition, *crazyflie-on-voice* provides a client that allows you to voice control Crazyflie 2.0 drones.
 
 Hardware requirements
 ---------------------
@@ -16,10 +16,32 @@ Follow the instructions in the `LPS documentation <https://www.bitcraze.io/getti
 Installation and setup
 ----------------------
 *crazyflie-on-voice* requires Python 3.6 or higher.
-To install *crazyflie-on-voice*, run ``pip install crazyflie-on-voice``.
-Start the voice controller by running ``crazyflie-on-voice "<your_crazyflie_uri>"``.
-(Replace ``<your_crazyflie_uri>`` with the URI of your Crazyflie, e.g. ``radio://0/80/250K``.)
+To get started, proceed as follows:
 
+* To install *crazyflie-on-voice*, run ``pip install crazyflie-on-voice``.
+
+* To start the crazyflie controller, run ``crazyflie-on-voice --uri=<your_crazyflie_uri>``.
+  (Replace ``<your_crazyflie_uri>`` with the URI of your Crazyflie, e.g. ``radio://0/80/250K``.)
+
+* Start the voice control client by running ``crazyflie-on-voice --voice-only``.
+
+Options
+-------
+The following command line options are available:
+
+* ``--uri``, ``-u``: URI of the crazyflie. Defaults to ``radio://0/110/2M``
+
+* ``--control-port``, ``-cp``: Port for the control server. Defaults to ``8000``.
+
+* ``--planing-port``, ``-pp``: Port for the planning server. Defaults to ``8001``.
+
+* ``--room-spec``, ``-rs``: Path to the room specification file. (see *Path planning* below). Defaults to ``./examples/room_spec_1.yaml``.
+
+* ``--voice`, ``-v``: Add, if you *also* want to start the voice control client. (The voice control client does not start by default.)
+
+* ``--voice-only`, ``-vo``:  Add, if you *only* want to start the voice control client.
+
+* ``--voice-api``, ``-va``: Speech-to-text API the voice control client users. Either ``google`` (software-as-a-service) or ``pocketsphinx`` (free software, local installation). Defaults to ``google``.
 
 Voice control
 -------------
@@ -32,31 +54,6 @@ To control your Crazyflie by voice, use the word sequence ``Crazy + <direction> 
 Note that the direction is absolute, considering the x,y, and z coordinates of the LPS (and not considering the yaw angle of the crazyflie).
 
 To stop your Crazyflie, use ``Crazy stop``.
-
-Generic HTTP interface
-----------------------
-*crazyflie on voice* consists of two main components: a voice control client and a generic HTTP server.
-To only run the HTTP server, exectue ``crazyflie-on-voice --server --port=<port>``.
-Replace ``<port>`` with the port on which you want your server to run.
-
-The server accepts ``POST`` requests to its base URL. The requests have to have the following structure:
-
-* either::
-
-    {"command": "<command>"},
-
-   , where command is either ``stop`` or ``start``.
-
-* or::
-
-    {"distance": ["<x>, <y>, <z>]}
-
-  , where ``<x>``, ``<y>``, ``<z>`` is the **change** in x, y, and z coordinates you want to achieve.
-
-  For example::
-
-    {"distance": [0, 0, 0.5]}}
-
 
 Pathfinding capabilities
 ------------------------
@@ -84,10 +81,35 @@ the second array specifies the coordinates of the corner that is closest to ``[0
 
 Then, run *crazyflie-on-voice* as follows:
 
-``crazyflie-on-voice "<your_crazyflie_uri>" --obstacles="<path-to-yaml-file>"``
+``crazyflie-on-voice "<your_crazyflie_uri>" --room-spec="<path-to-yaml-file>"``
+
+Generic HTTP interface
+----------------------
+*crazyflie on voice* consists of two main components: a voice control client and a generic HTTP server.
+To only run the HTTP server, exectue ``crazyflie-on-voice --server --port=<port>``.
+Replace ``<port>`` with the port on which you want your server to run.
+
+The server accepts ``POST`` requests to its base URL. The requests have to have the following structure:
+
+* either::
+
+    {"command": "<command>"},
+
+   , where command is either ``stop`` or ``start``.
+
+* or::
+
+    {"distance": ["<x>, <y>, <z>]}
+
+  , where ``<x>``, ``<y>``, ``<z>`` is the **change** in x, y, and z coordinates you want to achieve.
+
+  For example::
+
+    {"distance": [0, 0, 0.5]}}
+
 
 Troubleshooting voice control
 -----------------------------
 *crazyflie-on-voice* makes use of the *SpeechRecognition* library.
-If you have problems installing the package or with voice processing, read the instructions on the `SpeechRecognition documentation page <https://pypi.org/project/SpeechRecognition/>`__ to and make sure *SpeechRecognition* works on your machine with *PocketSphinx* and *PyAudio*.
+In case you want to use *crazyflie-on-voice* with *PocketSphinx* and you have problems installing the package or with voice processing, read the instructions on the `SpeechRecognition documentation page <https://pypi.org/project/SpeechRecognition/>`__ to and make sure *SpeechRecognition* works on your machine with *PocketSphinx* and *PyAudio*.
 
