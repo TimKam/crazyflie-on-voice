@@ -114,7 +114,7 @@ The server accepts ``POST`` requests to its base URL. The requests have to have 
 
     {"command": "<command>"},
 
-   , where command is either ``stop`` or ``start``.
+   , where command is either ``stop``, ``start``, or ``land``.
 
 * or::
 
