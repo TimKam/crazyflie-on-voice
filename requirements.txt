@@ -2,12 +2,7 @@ catkin_pkg
 cflib
 num2words
 numpy
-pocketsphinx
-pyaudio
 pyyaml
-python-Levenshtein
 requests
-SpeechRecognition
-word2number
 git+https://github.com/TimKam/tf#egg=tf
 -e git+https://github.com/bitcraze/crazyflie-lib-python#egg=cflib

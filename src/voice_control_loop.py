@@ -13,6 +13,7 @@ This module implements the voice control functionality.
 start_word = 'start'
 code_word = 'crazy'
 stop_word = 'stop'
+land_word = 'land'
 
 directions = [
     'up',
@@ -22,7 +23,8 @@ directions = [
     'left',
     'right',
     stop_word,
-    start_word
+    start_word,
+    land_word
 ]
 
 
@@ -33,7 +35,9 @@ def generate_protocol_data(direction, distance):
     :param distance:
     :return: command to be send to the control server
     """
-    if direction == stop_word or direction == start_word:
+    if direction == stop_word\
+            or direction == start_word\
+            or direction == land_word:
         return {'command': direction}
     else:
         distance = distance / 100
@@ -141,10 +145,12 @@ def start_command_loop(server_url, voice_api):
         print(term)
         if term:
             first_word = term.split()[0]
-            if len(term.split()) > 1 and code_word in first_word:
+            if len(term.split()) > 1 and code_word in first_word.lower():
                 print(f'Code word received.')
                 print('Getting direction...')
                 direction_term = term.split()[1]
+                if direction_term == '*':
+                    direction_term = start_word
                 best_direction_match =\
                     get_best_direction_match(direction_term)
                 if best_direction_match:
@@ -192,19 +198,3 @@ def start_command_loop(server_url, voice_api):
                                 f'Send data to server with result: {res_content}')
                         except Exception as e:
                             print(f'Failed to send request: {e}')
-
-
-# start_command_loop()
-
-
-"""
-# Test connection to server
-data = generate_protocol_data('up', 1)
-print(data)
-try:
-    request = requests.post(server_url, data=json.dumps(data))
-    response = request.content
-    print(f'Send data to server with result: {response}')
-except Exception as e:
-    print(f'Failed to send request: {e}')
-"""

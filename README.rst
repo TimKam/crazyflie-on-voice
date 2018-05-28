@@ -3,7 +3,7 @@ crazyflie-on-voice
 .. image:: https://travis-ci.org/TimKam/crazyflie-on-voice.svg?branch=master
     :target: https://travis-ci.org/TimKam/crazyflie-on-voice
     
-**Important: this project is currently under construction and does not work, yet.**
+**Important: this project is experimental.**
 
 *crazyflie-on-voice* provides a generic HTTP control server that allows integrating the crazyflie with custom programs, as well as with a wide range of third-party systems.
 In addition, *crazyflie-on-voice* provides a client that allows you to voice control Crazyflie 2.0 drones.
@@ -30,7 +30,7 @@ Options
 The following command line options are available:
 
 * ``--uri``, ``-u``: URI of the crazyflie. Defaults to ``radio://0/110/2M``
-`
+
 * ``--control-port``, ``-cp``: Port for the control server. Defaults to ``8000``.
 
 * ``--planing-port``, ``-pp``: Port for the planning server. Defaults to ``8001``.
@@ -114,7 +114,7 @@ The server accepts ``POST`` requests to its base URL. The requests have to have 
 
     {"command": "<command>"},
 
-   , where command is either ``stop`` or ``start``.
+   , where command is either ``stop``, ``start``, or ``land``.
 
 * or::
 
