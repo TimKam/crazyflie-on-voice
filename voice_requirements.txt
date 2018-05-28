@@ -1,0 +1,5 @@
+pocketsphinx
+pyaudio
+python-Levenshtein
+SpeechRecognition
+word2number
