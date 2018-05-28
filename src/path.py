@@ -22,12 +22,23 @@ class Point():
         self.y = y
         self.z = z
 
+    def __eq__(self, other):
+        return np.abs(self.x - other.x) <= np.finfo(float).eps \
+           and np.abs(self.y - other.y) <= np.finfo(float).eps \
+           and np.abs(self.z - other.z) <= np.finfo(float).eps
+
     def __repr__(self):
         return "({:.2f}, {:.2f}, {:.2f})".format(self.x, self.y, self.z)
 
     # measures the distance to a given point
     def distanceTo(self, point):
         return np.linalg.norm([self.x - point.x, self.y - point.y, self.z - point.z])
+
+    def sub(self, point):
+        return Point( self.x - point.x
+                    , self.y - point.y
+                    , self.z - point.z
+                    )
 
 
 # An abstract object.
@@ -178,7 +189,7 @@ class Scene():
 
             # we found a path!
             if current == targetCell:
-                return self.reconstructPath(cameFrom, current, target)
+                return self.postprocessPath(self.reconstructPath(cameFrom, current, target))
 
             o = self.getPoint(cameFrom[(current)])
             p = self.getPoint(current)
@@ -214,6 +225,37 @@ class Scene():
             path.append(self.getPoint(endpoint))
         return path[::-1]
 
+    def planLanding(self, start):
+        print("[DEBUG] planning landing...")
+
+        currentCell = self.getCoordinate(start)
+        landingPath = [start]
+        print("[DEBUG] landing waypoint: {}".format(currentCell))
+
+        # descend
+        while not self.space[currentCell[0], currentCell[1], currentCell[2]] and currentCell[2] > 0:
+            print("[DEBUG] landing waypoint: {}".format(currentCell))
+            currentCell = (currentCell[0], currentCell[1], currentCell[2] - 1)
+            landingPath.append(self.getPoint(currentCell))
+
+        return landingPath
+
+    def postprocessPath(self, path):
+        reducedPath = [path[0]]
+
+        for i in range(1, len(path) - 1):
+            print("[DEBUG] d1: {}, d2: {}, eq: {}".format(path[i].sub(path[i-1]), path[i+1].sub(path[i]), path[i].sub(path[i-1]) == path[i+1].sub(path[i])))
+
+            if path[i].sub(path[i-1]) != path[i+1].sub(path[i]):
+                reducedPath.append(path[i])
+
+        reducedPath.append(path[-1])
+
+        print("[DEBUG] Original path: {}".format(path))
+        print("[DEBUG] Reduced path: {}".format(reducedPath))
+
+        return reducedPath
+
 
 if __name__ == '__main__':
     table1 = Translate(Scale(Cube(), 1.30, 0.65, 0.75), 1.35, 0.68, 0.00)
@@ -226,7 +268,6 @@ if __name__ == '__main__':
     target = Point(2.0, 3.0, 0.9)
 
     path = scene.planPath(start, target)
-
     print(path)
 
     pathLength = 0
@@ -235,3 +276,6 @@ if __name__ == '__main__':
         pathLength += path[0].distanceTo(path[1])
         i += 1
     print(pathLength)
+
+    landingPath = scene.planLanding(start)
+    print(landingPath)

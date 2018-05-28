@@ -14,10 +14,10 @@ from json                import dumps
 # constants
 K_height_proportional = 0.25  # this should not be lower than 0.25
 K_height_derivative   = 0.15
-K_height_integral     = 0.05
+K_height_integral     = 0.075
 
-K_position_proportional = 12
-K_position_derivative   = 13
+K_position_proportional = 15
+K_position_derivative   = 15
 K_position_integral     = 0
 
 K_yaw_derivative        = 1
@@ -70,6 +70,14 @@ class StartCommand(Command):
 
     def execute(self, drone):
         drone.startMotors()
+
+
+class LandComand(Command):
+    def __init__(self):
+        Command.__init__(self)
+
+    def execute(self, drone):
+        drone.land()
 
 
 # The stop command stops the motors of the crazyflie. In most cases, this is
@@ -372,8 +380,10 @@ class ControllerThread(Thread):
     # from a thread!) Once the path is planned, the path planning server sets
     # a sequence of PositionCommands to the crazyflie.
     def setRelativeTarget(self, dx, dy, dz):
-        json = dumps({ "start"  : (self.pos_ref[0],      self.pos_ref[1],      self.pos_ref[2])
-                     , "target" : (self.pos_ref[0] + dx, self.pos_ref[1] + dy, self.pos_ref[2] + dz)
+        json = dumps({ "command" : "plan"
+                     , "data"    : { "start"  : (self.pos_ref[0],      self.pos_ref[1],      self.pos_ref[2])
+                                   , "target" : (self.pos_ref[0] + dx, self.pos_ref[1] + dy, self.pos_ref[2] + dz)
+                                   }
                      })
         t = Thread(target = post, args = ("http://localhost:8001", json))
         t.daemon = True
@@ -397,3 +407,12 @@ class ControllerThread(Thread):
         self.enable()
         if self.debug:
             print("[DEBUG] Starting motors!")
+
+    def land(self):
+        json = dumps({ "command" : "land"
+                     , "data"    : { "start" : (self.pos_ref[0], self.pos_ref[1], self.pos_ref[2]) }
+                     })
+
+        t = Thread(target = post, args = ("http://localhost:8001", json))
+        t.daemon = True
+        t.start()

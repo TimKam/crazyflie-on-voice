@@ -25,17 +25,34 @@ class PathPlanner(BaseHTTPRequestHandler):
             json = loads(request.decode())
             print("[DEBUG] Received request: {}".format(str(json)))
 
-            start, target = json["start"], json["target"]
+            if "command" in json:
+                if json["command"] == "plan":
+                    start, target = json["data"]["start"], json["data"]["target"]
 
-            start  = Point(start[0],  start[1],  start[2])
-            target = Point(target[0], target[1], target[2])
+                    start  = Point(start[0],  start[1],  start[2])
+                    target = Point(target[0], target[1], target[2])
 
-            planningStart = time.time()
-            path = self.server.scene.planPath(start, target)
-            print("[DEBUG] Found path: {:s}".format(str(path)))
-            print("[DEBUG] Path planning took {:.2f}s.".format(time.time() - planningStart))
-            for waypoint in path:
-                self.server.commandQueue.put(PositionCommand(waypoint.x, waypoint.y, waypoint.z))
+                    planningStart = time.time()
+                    path = self.server.scene.planPath(start, target)
+                    print("[DEBUG] Found path: {:s}".format(str(path)))
+                    print("[DEBUG] Path planning took {:.2f}s.".format(time.time() - planningStart))
+                    for waypoint in path:
+                        self.server.commandQueue.put(PositionCommand(waypoint.x, waypoint.y, waypoint.z))
+
+                elif json["command"] == "land":
+                    start = json["data"]["start"]
+                    start = Point(start[0], start[1], start[2])
+
+                    try:
+                        path = self.server.scene.planLanding(start)
+                    except Exception as e:
+                        print(e)
+                        raise e
+
+                    print("[DEBUG] Found landing path: {:s}".format(str(path)))
+                    for waypoint in path:
+                        self.server.commandQueue.put(PositionCommand(waypoint.x, waypoint.y, waypoint.z))
+                    self.server.commandQueue.put(StopCommand())
 
             else:
                 raise Exception("Unexpected input: {}".format(json))

@@ -26,6 +26,8 @@ class CrazyHandler(BaseHTTPRequestHandler):
                     self.server.commandQueue.put(StartCommand())
                 elif json["command"] == "stop":
                     self.server.commandQueue.put(StopCommand())
+                elif json["command"] == "land":
+                    self.server.commandQueue.put(LandComand())
                 else:
                     raise Exception("Invalid command: {}".format(json["command"]))
 
