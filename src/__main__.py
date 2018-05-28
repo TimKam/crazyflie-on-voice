@@ -37,6 +37,11 @@ parser.add_argument('-va', '--voice-api', type=str,
                     default='google',
                     help='Speech-to-text API the voice control client users.\
                     Either "google" or "pocketsphinx"')
+parser.add_argument('-cu', '--control-url', type=str,
+                    default='http://localhost',
+                    help='RL of the control server (without port). Only '
+                         'relevant for the voice client (in case you want to '
+                         'connect to a control server on a different machine).')
 
 args = vars(parser.parse_args())
 room_config = args['room_spec']
@@ -45,6 +50,7 @@ planning_port = args['planning_port']
 start_voice_control = args['voice']
 start_only_voice_control = args['voice_only']
 voice_api = args['voice_api']
+control_url = args['control_url']
 
 
 def read_input(file=sys.stdin):
@@ -184,7 +190,7 @@ def main():
         cf.close_link()
 
     if start_voice_control or start_only_voice_control:
-        start_command_loop(f'http://localhost:{control_port}', voice_api)
+        start_command_loop(f'{control_url}:{control_port}', voice_api)
 
 
 if __name__ == "__main__":

@@ -39,9 +39,11 @@ The following command line options are available:
 
 * ``--voice``, ``-v``: Add, if you *also* want to start the voice control client. (The voice control client does not start by default.)
 
-* ``--voice-only`, ``-vo``:  Add, if you *only* want to start the voice control client.
+* ``--voice-only``, ``-vo``:  Add, if you *only* want to start the voice control client.
 
 * ``--voice-api``, ``-va``: Speech-to-text API the voice control client users. Either ``google`` (software-as-a-service) or ``pocketsphinx`` (free software, local installation). Defaults to ``google``.
+
+* ``--control-url``, ``-cu``: URL of the control server (without port). Only relevant for the voice client (in case you want to connect to a control server on a different machine). Defaults to ``http://localhost``.
 
 Voice control
 -------------
