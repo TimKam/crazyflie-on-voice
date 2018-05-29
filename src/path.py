@@ -15,8 +15,10 @@ fst = lambda p: p[0]
 snd = lambda p: p[1]
 
 
-# A 3D point.
 class Point():
+    """
+    A 3D point
+    """
     def __init__(self, x, y , z):
         self.x = x
         self.y = y
@@ -30,39 +32,61 @@ class Point():
     def __repr__(self):
         return "({:.2f}, {:.2f}, {:.2f})".format(self.x, self.y, self.z)
 
-    # measures the distance to a given point
     def distanceTo(self, point):
+        """
+        measures the distance to a given point
+
+        :param point:
+        """
         return np.linalg.norm([self.x - point.x, self.y - point.y, self.z - point.z])
 
     def sub(self, point):
+        """
+
+        :param point:
+        """
         return Point( self.x - point.x
                     , self.y - point.y
                     , self.z - point.z
                     )
 
 
-# An abstract object.
 class Object(ABC):
+    """
+    An abstract object
+    """
     def __init__(self):
         pass
 
-    # Checks whether the given point lies within the object.
     @abstractmethod
     def contains(self, point):
+        """
+        Checks whether the given point lies within the object.
+
+        :param point:
+        :return:
+        """
         raise Exception("contains not implemented.")
 
 
-# Scales an object according to the given scaling factors in x-, y-, and z-direction.
 class Scale(Object):
+    """
+    Scales an object according to the given scaling factors in x-, y-, and z-direction.
+    """
     def __init__(self, scaledObject, scaleX, scaleY, scaleZ):
         self.scaledObject = scaledObject
         self.scaleX       = scaleX
         self.scaleY       = scaleY
         self.scaleZ       = scaleZ
 
-    # Transforms the given point into the coordinate frame of the object and
-    # checks whether the point lies within the object.
     def contains(self, point):
+        """
+        Transforms the given point into the coordinate frame of the object and
+        checks whether the point lies within the object.
+
+        :param point:
+        :return:
+        """
         scaledPoint = Point( point.x / self.scaleX
                            , point.y / self.scaleY
                            , point.z / self.scaleZ
@@ -71,17 +95,24 @@ class Scale(Object):
         return self.scaledObject.contains(scaledPoint)
 
 
-# Translates an object according to the given translations in x-, y-, and z-direction.
 class Translate(Object):
+    """
+    Translates an object according to the given translations in x-, y-, and z-direction.
+    """
     def __init__(self, translatedObject, translateX, translateY, translateZ):
         self.translatedObject = translatedObject
         self.translateX       = translateX
         self.translateY       = translateY
         self.translateZ       = translateZ
 
-    # Translates the given point into the coordinate frame of the object and
-    # checks whether the point lies within the object.
     def contains(self, point):
+        """
+        Translates the given point into the coordinate frame of the object and
+        checks whether the point lies within the object.
+
+        :param point:
+        :return:
+        """
         translatedPoint = Point( point.x - self.translateX
                                , point.y - self.translateY
                                , point.z - self.translateZ
@@ -90,24 +121,33 @@ class Translate(Object):
         return self.translatedObject.contains(translatedPoint)
 
 
-# A unit cube.
 class Cube(Object):
+    """
+    A unit cube
+    """
     def __init(self):
       Object.__init__(self)
 
-    # The unit cube contains those points which have coordinates between 0 and 1
-    # in all dimenstions.
     def contains(self, point):
+        """
+        The unit cube contains those points which have coordinates between 0 and 1
+        in all dimenstions.
+
+        :param point:
+        :return: ``True`` or ``False``
+        """
         return 0 <= point.x <= 1 \
            and 0 <= point.y <= 1 \
            and 0 <= point.z <= 1
 
 
-# A scene is represented as a cuboid and contains a set of obstacles that should
-# be avoided in path planning. When constructed, the scene is represented as a
-# regular cartesian grid according to the given resolution. The space is sampled
-# and occupied grid cells are marked.
 class Scene():
+    """
+    A scene is represented as a cuboid and contains a set of obstacles that should
+    be avoided in path planning. When constructed, the scene is represented as a
+    regular cartesian grid according to the given resolution. The space is sampled
+    and occupied grid cells are marked.
+    """
     def __init__(self, dimX, dimY, dimZ, resolution, obstacles):
       self.resolution = resolution
       self.bounds     = Scale(Cube(), dimX, dimY, dimZ)
@@ -129,8 +169,13 @@ class Scene():
                   p = Point((i + 0.5) * resolution, (j + 0.5) * resolution, (k + 0.5) * resolution)
                   self.space[i, j, k] = any([obstacle.contains(p) for obstacle in obstacles])
 
-    # Get the middle of a given grid cell (gx, gy, gz).
     def getPoint(self, xyz):
+        """
+        Get the middle of a given grid cell (gx, gy, gz)
+
+        :param xyz:
+        :return:
+        """
         return Point( (xyz[0] + 0.5) * self.resolution
                     , (xyz[1] + 0.5) * self.resolution
                     , (xyz[2] + 0.5) * self.resolution
@@ -143,8 +188,14 @@ class Scene():
                , int(point.z  / self.resolution)
                )
 
-    # Use A* to plan a path from start to target and avoids the obstacles in the scene.
     def planPath(self, start, target):
+        """
+        Use A* to plan a path from start to target and avoids the obstacles in the scene.
+
+        :param start:
+        :param target:
+        :return:
+        """
         # the start point must be within the scene
         if not self.bounds.contains(start):
             raise Exception("Start ({:.2f}, {:.2f}, {:.2f}) is out of bounds!".format(start.x, start.y, start.z))
@@ -213,6 +264,13 @@ class Scene():
         raise Exception("Cannot find a path to target!")
 
     def reconstructPath(self, cameFrom, endpoint, target):
+        """
+
+        :param cameFrom:
+        :param endpoint:
+        :param target:
+        :return:
+        """
         path = [ target
                , self.getPoint(endpoint)
                ]
@@ -223,6 +281,11 @@ class Scene():
         return path[::-1]
 
     def planLanding(self, start):
+        """
+
+        :param start:
+        :return:
+        """
         print("[DEBUG] planning landing...")
 
         currentCell = self.getCoordinate(start)
@@ -238,6 +301,11 @@ class Scene():
         return landingPath
 
     def postprocessPath(self, path):
+        """
+
+        :param path:
+        :return:
+        """
         reducedPath = [path[0]]
 
         for i in range(1, len(path) - 1):
