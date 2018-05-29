@@ -8,6 +8,12 @@ except ImportError:
 
 
 def parse(path):
+    """
+    Parses a YAML scene specification
+
+    :param path: Path to the YAML scene specification
+    :return: the ``Scene`` object
+    """
     file = open(path, 'r').read()
     yaml_scene = load(file, Loader=Loader)
     room = yaml_scene[0]
@@ -20,7 +26,6 @@ def parse(path):
 
     return Scene(*room_measers, 0.1, objects)
 
-# parse('../examples/room_spec_1.yaml')
 
 
 

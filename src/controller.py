@@ -27,8 +27,10 @@ m = 0.0327
 g = 9.82
 
 
-# Commands can be applied to the crazyflie
 class Command():
+    """
+    Commands can be applied to the crazyflie
+    """
     def __init__(self):
         pass
 
@@ -36,9 +38,11 @@ class Command():
         pass
 
 
-# The distance command sets a new reference position for the crazyflie, relative
-# to the current reference position.
 class DistanceCommand(Command):
+    """
+    The distance command sets a new reference position for the crazyflie, relative
+    to the current reference position.
+    """
     def __init__(self, dx, dy, dz):
         Command.__init__(self)
         self.dx = dx
@@ -49,9 +53,11 @@ class DistanceCommand(Command):
         drone.setRelativeTarget(self.dx, self.dy, self.dz)
 
 
-# The position command sets a new reference position for the crazyflie, however,
-# the new reference position is absolute in this case.
 class PositionCommand(Command):
+    """
+    The position command sets a new reference position for the crazyflie, however,
+    the new reference position is absolute in this case.
+    """
     def __init__(self, x, y, z):
         Command.__init__(self)
         self.x = x
@@ -62,9 +68,11 @@ class PositionCommand(Command):
         drone.setAbsoluteTarget(self.x, self.y, self.z)
 
 
-# The start command starts the crazyflie and sets the reference position a few
-# centimeters above the current position.
 class StartCommand(Command):
+    """
+    The start command starts the crazyflie and sets the reference position a few
+    centimeters above the current position.
+    """
     def __init__(self):
         Command.__init__(self)
 
@@ -73,6 +81,10 @@ class StartCommand(Command):
 
 
 class LandComand(Command):
+    """
+    The land command lands the crazyflie at the current position and stops
+    the motors.
+    """
     def __init__(self):
         Command.__init__(self)
 
@@ -80,9 +92,11 @@ class LandComand(Command):
         drone.land()
 
 
-# The stop command stops the motors of the crazyflie. In most cases, this is
-# not a beautiful landing.
 class StopCommand(Command):
+    """
+    The stop command stops the motors of the crazyflie. In most cases, this is
+    not a beautiful landing.
+    """
     def __init__(self):
         Command.__init__(self)
 
@@ -90,8 +104,10 @@ class StopCommand(Command):
         drone.stopMotors()
 
 
-# The controller thread for the crazyflie.
 class ControllerThread(Thread):
+    """
+    The controller thread for the crazyflie
+    """
     period_in_ms = 20  # Control period. [ms]
     thrust_step = 5000 # Thrust step with W/S. [65535 = 100% PWM duty cycle]
     thrust_initial = 0
@@ -224,8 +240,8 @@ class ControllerThread(Thread):
         print('Error when logging %s: %s' % (logconf.name, msg))
 
     def make_position_sanity_check(self):
-      # We assume that the position from the LPS should be
-      # [-20m, +20m] in xy and [0m, 5m] in z
+      """We assume that the position from the LPS should be
+      [-20m, +20m] in xy and [0m, 5m] in z"""
       if np.max(np.abs(self.pos[:2])) > 20 or self.pos[2] < 0 or self.pos[2] > 5:
         raise RuntimeError('Position estimate out of bounds', self.pos)
 
@@ -286,6 +302,9 @@ class ControllerThread(Thread):
                 self.loop_sleep(time_start)
 
     def calc_control_signals(self):
+        """
+        calculates the control signals: roll, pitch, yaw
+        """
         roll, pitch, yaw  = trans.euler_from_quaternion(self.attq)
 
         # Compute control errors in position
@@ -321,8 +340,10 @@ class ControllerThread(Thread):
             print("control:  ({:.2f}, {:.2f}, {:.2f}, {:.2f})".format(self.roll_r, self.pitch_r, self.yawrate_r, self.thrust_r))
             print("")
 
-
     def reset_estimator(self):
+        """
+        Resets the Kalman filter estimator
+        """
         self.cf.param.set_value('kalman.resetEstimation', '1')
         time.sleep(0.1)
         self.cf.param.set_value('kalman.resetEstimation', '0')
@@ -331,6 +352,9 @@ class ControllerThread(Thread):
         time.sleep(1.5)
 
     def disable(self, stop=True):
+        """
+        Disables the controller
+        """
         if stop:
             self.send_setpoint(0.0, 0.0, 0.0, 0)
         if self.enabled:
@@ -342,6 +366,9 @@ class ControllerThread(Thread):
         self.thrust_r  = self.thrust_initial
 
     def enable(self):
+        """
+        Enables the controller
+        """
         if not self.enabled:
             print('Enabling controller')
         # Need to send a zero setpoint to unlock the controller.
@@ -363,23 +390,32 @@ class ControllerThread(Thread):
             print('Deadline missed by', -delta_time, 'seconds. Too slow control loop!')
 
     def increase_thrust(self):
+        """
+        Increases the thrust level
+        """
         self.thrust_r += self.thrust_step
         self.thrust_r = min(self.thrust_r, 0xffff)
 
     def decrease_thrust(self):
+        """
+        Decreases the thrust level
+        """
         self.thrust_r -= self.thrust_step
         self.thrust_r = max(0, self.thrust_r)
 
     def toggle_debug(self):
+        """
+        Enable/disable debug mode
+        """
         print("[DEBUG] Switching debug output {:s}".format("off" if self.debug else "on"))
         self.debug = not self.debug
 
-    # Sets a reference position, relative to the current reference position.
-    # For that, a path planning request is made to the path planning server in
-    # a separate thread. (But it's really annoying that we can't start a process
-    # from a thread!) Once the path is planned, the path planning server sets
-    # a sequence of PositionCommands to the crazyflie.
     def setRelativeTarget(self, dx, dy, dz):
+        """Sets a reference position, relative to the current reference position.
+        For that, a path planning request is made to the path planning server in
+        a separate thread. (But it's really annoying that we can't start a process
+        from a thread!) Once the path is planned, the path planning server sets
+        a sequence of PositionCommands to the crazyflie."""
         json = dumps({ "command" : "plan"
                      , "data"    : { "start"  : (self.pos_ref[0],      self.pos_ref[1],      self.pos_ref[2])
                                    , "target" : (self.pos_ref[0] + dx, self.pos_ref[1] + dy, self.pos_ref[2] + dz)
@@ -389,26 +425,40 @@ class ControllerThread(Thread):
         t.daemon = True
         t.start()
 
-    # Sets a new absolute reference position.
+
     def setAbsoluteTarget(self, x, y, z):
+        """
+        Sets a new absolute reference position.
+        :param x:
+        :param y:
+        :param z:
+        """
         self.pos_ref = np.r_[x, y, z]
 
         if self.debug:
             print("[DEBUG] Setting reference position to ({:.2f}, {:.2f}, {:.2f})".format(self.pos_ref[0], self.pos_ref[1], self.pos_ref[2]))
 
-    # Used by StopCommand.execute. Tells the crazyflie to "land".
     def stopMotors(self):
+        """
+        Used by StopCommand.execute. Tells the crazyflie to "land".
+        """
         self.disable()
         if self.debug:
             print("[DEBUG] Stopping motors!")
 
-    # Used by StartCommand.execute. Tells the crazyflie to start.
+
     def startMotors(self):
+        """
+        Used by StartCommand.execute. Tells the crazyflie to start.
+        """
         self.enable()
         if self.debug:
             print("[DEBUG] Starting motors!")
 
     def land(self):
+        """
+        Send the land command to the planner
+        """
         json = dumps({ "command" : "land"
                      , "data"    : { "start" : (self.pos_ref[0], self.pos_ref[1], self.pos_ref[2]) }
                      })

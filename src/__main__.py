@@ -14,7 +14,7 @@ from cflib import crazyflie, crtp
 from src.controller import ControllerThread
 from multiprocessing import Process, Queue
 from src.ControlServer import run_server
-from src.PlannigServer import run_path_planner
+from src.PlanningServer import run_path_planner
 from src.voice_control_loop import start_command_loop
 
 parser = argparse.ArgumentParser(description='Crazyflie control platform')

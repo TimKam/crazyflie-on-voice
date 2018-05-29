@@ -31,8 +31,9 @@ directions = [
 def generate_protocol_data(direction, distance):
     """
     Generates the command JSON object the Crazyflie control server expects
-    :param direction:
-    :param distance:
+
+    :param direction: the target direction of the Crazyflie
+    :param distance: the target distance of the Crazyflie
     :return: command to be send to the control server
     """
     if direction == stop_word\
@@ -58,6 +59,7 @@ def generate_protocol_data(direction, distance):
 def get_best_direction_match(direction_input):
     """
     Returns best direction matched, based on input direction
+
     :param direction_input: direction as provided by the voice-to-text parser
     :return: best match if score < 4; else None
     """
@@ -78,6 +80,7 @@ def get_best_direction_match(direction_input):
 def listen(recognizer, mic, keywords, uses_google_api):
     """
     Listens for a set of (keyword, priority) tuples and returns the response
+
     :param recognizer: speech_recognition Recognizer object
     :param mic: speech_recognition Microphone object
     :param keywords: Iterable of (keyword, priority) tuples
@@ -104,6 +107,7 @@ def listen(recognizer, mic, keywords, uses_google_api):
 def start_command_loop(server_url, voice_api):
     """
     Starts the voice control command loop
+
     :param server_url: URL (incl. port) of the control server to connect to
     :param voice_api: Voice API to use: "google" or "pocketsphinx"
     """

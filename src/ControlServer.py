@@ -6,8 +6,10 @@ from json.decoder import JSONDecodeError
 from src.controller import *
 
 
-# The request handler for commands that should be sent to the crazyflie.
 class CrazyHandler(BaseHTTPRequestHandler):
+    """
+    The request handler for commands that should be sent to the crazyflie
+    """
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/json')
@@ -47,8 +49,15 @@ class CrazyHandler(BaseHTTPRequestHandler):
         self.wfile.write(dumps(reply).encode())
 
 
-# Run a server and listen for commands sent to the crazyflie.
 def run_server(hostname, port, commandQueue):
+    """
+    Runs a server and listen for commands sent to the crazyflie
+
+    :param hostname:
+    :param port:
+    :param commandQueue:
+    :return:
+    """
     server = HTTPServer((hostname, port), CrazyHandler)
     server.commandQueue = commandQueue
     server.serve_forever()
