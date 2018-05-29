@@ -1,9 +1,10 @@
 crazyflie-on-voice
 ==================
+
 .. image:: https://travis-ci.org/TimKam/crazyflie-on-voice.svg?branch=master
-    :target: https://travis-ci.org/TimKam/crazyflie-on-voice
+        :target: https://travis-ci.org/TimKam/crazyflie-on-voice
     
-**Important: this project is experimental.**
+.. **Important: this project is experimental.**
 
 *crazyflie-on-voice* provides a generic HTTP control server that allows integrating the crazyflie with custom programs, as well as with a wide range of third-party systems.
 In addition, *crazyflie-on-voice* provides a client that allows you to voice control Crazyflie 2.0 drones.
@@ -18,7 +19,19 @@ Installation and setup
 *crazyflie-on-voice* requires Python 3.6 or higher.
 To get started, proceed as follows:
 
-* To install *crazyflie-on-voice*, run ``pip install crazyflie-on-voice``.
+* First install the dependency ``catkin_pkg`` manually, by running ``pip install catkin_pkg``.
+
+* If you want to use the voice controller, also install the following dependencies (you only need ``pocketsphinx`` if you want to use it instead of Google's speech-to-text API)::
+
+    pocketsphinx
+    pyaudio
+    python-Levenshtein
+    SpeechRecognition
+    word2number
+
+  Installing ``pocketsphinx`` and ``pyaudio`` can require some effort (use the search engine of your choice).
+
+* To install *crazyflie-on-voice*, run ``pip install git+https://github.com/TimKam/crazyflie-on-voice``.
 
 * To start the crazyflie controller, run ``crazyflie-on-voice --uri=<your_crazyflie_uri>``.
   (Replace ``<your_crazyflie_uri>`` with the URI of your Crazyflie, e.g. ``radio://0/80/250K``.)
@@ -59,7 +72,7 @@ To stop your Crazyflie, use ``Crazy stop``.
 
 Pathfinding capabilities
 ------------------------
-The Crazyflie can autonomously circumvent obstacles using a custom implementation of a an `A* search<https://en.wikipedia.org/wiki/A*_search_algorithm>`__-based pathfinding algorithm.
+The Crazyflie can autonomously circumvent obstacles using a custom implementation of a an `A* search <https://en.wikipedia.org/wiki/A*_search_algorithm>`__-based pathfinding algorithm.
 The bounds of the environment as well as the obstacles within the environment must be described and are assumed to be static.
 Currently, obstacles are described as unit cubes which are then scaled and translated so they represent objects of the correct size and position in the environment.
 (Rotation of objects is currently not possible but could be added easily.)
@@ -131,4 +144,8 @@ Troubleshooting voice control
 -----------------------------
 *crazyflie-on-voice* makes use of the *SpeechRecognition* library.
 In case you want to use *crazyflie-on-voice* with *PocketSphinx* and you have problems installing the package or with voice processing, read the instructions on the `SpeechRecognition documentation page <https://pypi.org/project/SpeechRecognition/>`__ to and make sure *SpeechRecognition* works on your machine with *PocketSphinx* and *PyAudio*.
+
+Acknowledgements
+----------------
+This work was partially supported by the Wallenberg AI, Autonomous Systems and Software Program (WASP) funded by the Knut and Alice Wallenberg Foundation.
 
